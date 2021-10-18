@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SignalR HttpConnectionDisposalIssue</title>
+    <script src="/lib/microsoft-signalr/signalr.js"></script>
+    <script type="text/javascript">
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/testhub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        async function start() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected.");
+            } catch (err) {
+                console.log(err);
+                setTimeout(start, 5000);
+            }
+        };
+
+        connection.onclose(async () => {
+            await start();
+        });
+
+        start();
+    </script>
+</head>
+<body>
+    <div>
+        <button onclick="connection.stop()">Press to Stop SignalR Connection and trigger Error</button>
+    </div>
+
+</body>
+</html>
