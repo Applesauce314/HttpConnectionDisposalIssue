@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace HttpConnectionDisposalIssue
@@ -36,11 +37,12 @@ namespace HttpConnectionDisposalIssue
             _ = app.UseStaticFiles();
             _ = app.UseWebSockets();
             _ = app.UseRouting();
-
+            
             _ = app.Use(async (context, next) =>
             {
 
                 Console.WriteLine(context?.User?.Identity?.Name);
+                Debug.Assert(context?.User?.Identity is WindowsIdentity,"This must be run in a context where context.user.identity is a windowsIdentity for the failure to occur");
                 await next.Invoke();
                 // Do logging or other work that doesn't write to the Response.
                 //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-5.0#create-a-middleware-pipeline-with-iapplicationbuilder-1
@@ -48,6 +50,7 @@ namespace HttpConnectionDisposalIssue
                 {
                     try
                     {
+
                         string name = context?.User?.Identity?.Name;
                         Console.WriteLine(name);
                     }
